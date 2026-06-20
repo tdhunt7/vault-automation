@@ -11,8 +11,12 @@ from pathlib import Path
 #   export VAULT_PATH=~/ObsidianVaults/MyVault
 VAULT_PATH = Path(os.environ.get("VAULT_PATH", str(Path.home() / "ObsidianVaults" / "MyVault")))
 
-# Folders to skip when scanning (templates, assets, obsidian internals)
-EXCLUDE_DIRS = {".obsidian", ".smart-env", "Templates", "Assets", "copilot", "Field Notes"}
+# Standard Obsidian internals are always excluded.
+# Add your own folders via VAULT_EXCLUDE_DIRS env var (comma-separated):
+#   export VAULT_EXCLUDE_DIRS="Field Notes,Inbox"
+_base_exclude = {".obsidian", ".smart-env", "Templates", "Assets"}
+_extra = os.environ.get("VAULT_EXCLUDE_DIRS", "")
+EXCLUDE_DIRS = _base_exclude | {d.strip() for d in _extra.split(",") if d.strip()}
 
 # ── Embeddings ───────────────────────────────────────────────────────────────
 # Provider: "openai" or "ollama"

@@ -28,7 +28,7 @@ All settings live in `vault_linker/config.py`:
 - `VAULT_PATH` — path to your Obsidian vault
 - `EMBEDDING_PROVIDER` — `"openai"` or `"ollama"` (default: `"ollama"`)
 - `OLLAMA_MODEL` — embedding model name (default: `"nomic-embed-text"`)
-- `EXCLUDE_DIRS` — folders to skip (e.g., Field Notes, templates)
+- `EXCLUDE_DIRS` — folders to skip (Obsidian internals pre-set; add your own via `VAULT_EXCLUDE_DIRS` env var)
 
 **Thresholds:**
 - `ACTION_HINT_THRESHOLD` (0.75) — minimum score to show "add link" hints
@@ -184,16 +184,12 @@ The Ollama integration uses the `/api/embed` endpoint with batch input, sending 
 
 Notes longer than ~24,000 characters are truncated before embedding to stay within the model's 8192-token context window. This is conservative (most notes are well under this limit) and preserves the opening sections where the strongest semantic signal lives. If Ollama returns an error, the actual error body is captured and printed to help diagnose the issue.
 
-## Field Notes
-
-Field Notes (daily notes from the Daily Notes plugin) are excluded from the embedding index via `EXCLUDE_DIRS` in `config.py`. This is intentional: daily capture notes are typically unstructured, and their noisy text produces muddy embeddings that dilute similarity scores for structured academic notes. If a field note produces an idea worth linking, distill it into a proper note with frontmatter and tags first, then it enters the index naturally. If your field notes are already structured with frontmatter/tags, you can remove `"Field Notes"` from `EXCLUDE_DIRS` to include them.
-
-## Why Link Suggestions May Be Sparse
+## Roadmap
 
 If the TUI isn't surfacing many "add link" suggestions, three factors are likely compounding:
 
 1. **Your vault is already well-linked.** If you spent time manually building backlinks and See Also sections, the tool is looking for connections you missed — and there may not be many left.
-2. **Domain clustering.** Academic notes within the same course share heavy vocabulary overlap (all MVA notes use "regression," "multivariate," "eigenvalue"), producing a flat similarity landscape where everything is moderately similar to everything else in that domain. Nothing stands out as a non-obvious connection. The tool is most valuable for **cross-domain** connections — a time series note that should reference an MVA concept, or a Python note that relates to a simulation method.
+2. **Domain clustering.** Notes within the same subject area share heavy vocabulary overlap, producing a flat similarity landscape where everything is moderately similar to everything else in that domain. The tool is most valuable for **cross-domain** connections — notes from different subject areas that share an underlying concept.
 3. **Embedding model capacity.** A smaller model may not distinguish subtle conceptual relationships from surface vocabulary overlap. Upgrading to a larger model (see "When to upgrade" above) improves discrimination within dense domains.
 
 ## Roadmap
@@ -229,16 +225,3 @@ vault_linker/
 └── cache/          # Embedding cache (auto-generated)
 ```
 
-## Methodology Summary
-
-*Reference for explaining the project externally (LinkedIn, portfolio, etc.)*
-
-Vault Linker is a terminal-based tool that uses semantic embeddings to surface non-obvious connections between notes in an Obsidian vault. It reads each markdown file, generates a vector representation of its content using a local embedding model (no data leaves the machine), then computes pairwise cosine similarities to rank which notes are most conceptually related.
-
-The core innovation is a **dual embedding system**: each note produces two vectors — one for its body content (what it discusses) and one for its title and tags (what it is). Standard cosine similarity is symmetric (A's similarity to B equals B's to A), which tells you two notes are related but not which one should reference the other. By comparing body-to-title asymmetrically — how much does A's content discuss B's identity, versus how much does B's content discuss A's identity — the system infers link direction. The raw asymmetric delta is normalized to a z-score against the vault-wide distribution so that directionality judgments are calibrated to the specific vault's characteristics.
-
-Tag suggestions use **peer propagation**: for each of a note's top connections, any tags present on the connection but absent from the source note are accumulated with the connection's similarity score as weight. Tags that appear across many high-scoring neighbors rank highest — the logic being that if three of your most similar notes all share a tag you lack, that tag probably applies to you too.
-
-The tool runs entirely locally. Embeddings are computed via Ollama (or optionally OpenAI), cached with content-hash invalidation so only changed notes are re-embedded, and served through a Textual TUI with keyboard-driven navigation, write-back support, and Obsidian integration.
-
-The problem it solves is straightforward: a vault of 100+ interconnected academic notes is too large to hold the full graph in your head. Manual linking is thorough but inevitably misses cross-domain connections. This tool catches what you missed and helps maintain link quality as the vault grows.
