@@ -10,6 +10,13 @@ Usage:
 import sys
 
 def main():
+    from vault_linker.config import VAULT_PATH
+    if not VAULT_PATH.exists():
+        print(f"Error: vault path does not exist: {VAULT_PATH}")
+        print("Set the VAULT_PATH environment variable to your Obsidian vault, e.g.:")
+        print("  export VAULT_PATH=~/ObsidianVaults/MyVault")
+        sys.exit(1)
+
     if "--reindex" in sys.argv:
         from vault_linker.config import CACHE_FILE, TITLE_CACHE_FILE
         for cf in (CACHE_FILE, TITLE_CACHE_FILE):

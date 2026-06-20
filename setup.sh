@@ -45,6 +45,20 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo ""
 fi
 
+# Check for vault path
+echo ""
+if [ -z "$VAULT_PATH" ]; then
+    echo "⚠ VAULT_PATH is not set."
+    echo "  Add this to your shell config (e.g. ~/.zshrc):"
+    echo "    export VAULT_PATH=~/path/to/your/ObsidianVault"
+else
+    if [ -d "$VAULT_PATH" ]; then
+        echo "✓ VAULT_PATH set: $VAULT_PATH"
+    else
+        echo "⚠ VAULT_PATH is set but directory not found: $VAULT_PATH"
+    fi
+fi
+
 # Offer to create shell alias
 echo ""
 echo "Add a shell alias? This lets you type 'vault' to launch."

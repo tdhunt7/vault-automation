@@ -13,6 +13,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Set your vault path:
+
+```bash
+export VAULT_PATH=~/path/to/your/ObsidianVault
+```
+
 Requires a running Ollama instance with an embedding model:
 
 ```bash
