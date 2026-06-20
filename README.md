@@ -190,17 +190,14 @@ The Ollama integration uses the `/api/embed` endpoint with batch input, sending 
 
 Notes longer than ~24,000 characters are truncated before embedding to stay within the model's 8192-token context window. This is conservative (most notes are well under this limit) and preserves the opening sections where the strongest semantic signal lives. If Ollama returns an error, the actual error body is captured and printed to help diagnose the issue.
 
-## Roadmap
-
-If the TUI isn't surfacing many "add link" suggestions, three factors are likely compounding:
+## Why Link Suggestions May Be Sparse, three factors are likely compounding:
 
 1. **Your vault is already well-linked.** If you spent time manually building backlinks and See Also sections, the tool is looking for connections you missed — and there may not be many left.
 2. **Domain clustering.** Notes within the same subject area share heavy vocabulary overlap, producing a flat similarity landscape where everything is moderately similar to everything else in that domain. The tool is most valuable for **cross-domain** connections — notes from different subject areas that share an underlying concept.
 3. **Embedding model capacity.** A smaller model may not distinguish subtle conceptual relationships from surface vocabulary overlap. Upgrading to a larger model (see "When to upgrade" above) improves discrimination within dense domains.
 
-## Roadmap
+## Features
 
-Implemented:
 - Core TUI with note list, connection panel, similarity scores, directional arrows
 - Tag suggestion system via peer-based propagation with confidence coloring
 - Write-back: `Ctrl+W` to add `[[links]]` to See Also with confirmation prompt
@@ -211,11 +208,6 @@ Implemented:
 - Search/filter across notes
 - Hide-linked toggle and sort modes
 - Batch embedding via Ollama `/api/embed` endpoint
-
-Planned:
-- **Configurable thresholds via CLI flags or `.vault-linker.toml`** — tune `ACTION_HINT_THRESHOLD`, `DIRECTION_Z_THRESHOLD`, tag confidence levels without editing source
-- **Tag confidence color gradient refinement** — the confidence colors work (green/yellow/gray via `tag_confidence_color`), but the visual presentation in the TUI could be more prominent
-- **Export mode** — `--report` CLI flag to dump top N unlinked connections to stdout without launching the full TUI
 
 ## Project Structure
 
